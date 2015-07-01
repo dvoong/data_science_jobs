@@ -4,3 +4,6 @@
 
 # Python cache files
 *.pyc
+
+# Mac OS Files
+*.DS_Store
