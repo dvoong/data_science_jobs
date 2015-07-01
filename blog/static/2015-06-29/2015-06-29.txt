@@ -1,0 +1,31 @@
+Setup the project today
+Started looking at data sources
+Initialised a django project
+Initialised a github repository
+
+Data sources
+Googled "biggest employment agencies" and clicked on "http://www.jobsite.co.uk/insider/uks-top-10-recruitment-agencies-celebrated-jobsites-recruitrank-awards-2012-11320/" which has a list of the "top" recruitment agencies determined by the RecruitRank Awards. Don't actually recognise any of these agencies so decided that it wasn't the most relevant for my study which is aimed at less specialised recruiters.
+Googled "most popular recruitment sites uk" and clicked on "http://www.bestjobwebsites.co.uk/" which lists the top 10 websites
+
+jobsearch.direct.gov.uk: data available via ftp://ftp.zois.co.uk/pub/jcp
+www.reed.co.uk:
+	https://www.reed.co.uk/developers
+	https://www.reed.co.uk/developers
+www.totaljobs.co.uk:
+	not allowed to scrape their database, see terms and conditions
+www.monster.co.uk
+	Think I need to be in partnership with monster? http://partner.monster.com/
+	http://partner.monster.com/developers
+www.linkedin.com
+	https://help.linkedin.com/app/ask/path/api-dvr
+	Not allowed
+LMI (labour market information):
+	http://www.nesta.org.uk/blog/introducing-open-data-jobs-open-data-challenge
+	http://www.lmiforall.org.uk/
+	http://www.lmiforall.org.uk/wp-content/uploads/2014/10/CareerHack-How-to-Guide.pdf
+indeed:
+	http://www.indeed.co.uk/publisher
+
+Other
+NHS choices is an open database about patient care in the NHS
+Guardian general datasets: http://www.theguardian.com/news/datablog/interactive/2013/jan/14/all-our-datasets-index
