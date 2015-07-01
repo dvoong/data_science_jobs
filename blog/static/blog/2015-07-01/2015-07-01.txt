@@ -1,0 +1,4 @@
+Planning the structure of the article
+What questions to ask?
+Layout of the article
+How to store the data?
