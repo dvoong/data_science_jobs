@@ -35,6 +35,49 @@ class NewVisitorTest(StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
+    def test_main(self):
+        # User goes to homepage and sees the title, author and date
+        self.browser.get(self.live_server_url)
+        self.assertIn('Analysis of Data Science Jobs', self.browser.title)
+        header_text = self.browser.find_element_by_tag_name('h1').text
+        self.assertEqual(header_text, 'Analysis of Data Science Jobs')
+
+        # The user sees the introduction section
+        sections = self.browser.find_elements_by_tag_name('section')
+        section_names = [section.id for section in sections]
+        self.assertIn('introduction', section_names)
+        introduction_section = filter(sections, lambda x: x.id == 'introduction')[0]
+        introduction_header = introduction_section.find_element_by_tag_name('h2')
+        self.assertEqual('Introduction', introduction_header.text)
+
+        # The user reads the introduction section
+        paragraphs = introduction_section.find_elements_by_tag_name('p')
+        self.assertGreaterEqual(len(paragraphs), 1)
+
+        # The user scrolls down to the salaries section
+        self.assertIn('salaries', section_names)
+        salaries_section = filter(sections, lambda x: x.id == 'salaries')[0]
+        salaries_header = salaries_setion.find_element_by_tag_name('h2')
+        self.assertEqual('Salaries', salaries_header.text)
+
+        # The user reads the salaries section
+        paragraphs = salaries_section.find_elements_by_tag_name('p')
+        self.assertGreaterEqual(len(paragraphs), 1)
+        
+        # The user sees a histogram of salaries
+        salaries_histogram = salaries_section.find_element_by_id("salaries_histogram")
+        self.assertNotNone(salaries_histogram)
+
+        # The user sees a heat map of the salaries as a function of geolocation
+        salaries_geoloc = salaries_section.find_element_by_id("salaries_by_geolocation")
+        self.assertNotNone(salaries_geoloc)
+
+        # User sees a bar chart of skills vs mean salary
+        salaries_skills = salaries_section.find_element_by_id("salaries_by_skills")
+        self.assertNotNone(salaries_skills)
+
+        
+
 #     def check_for_row_in_list_table(self, row_text):
 #         table = self.browser.find_element_by_id('id_list_table')
 #         rows = table.find_elements_by_tag_name('tr')
