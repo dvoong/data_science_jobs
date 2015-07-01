@@ -2,7 +2,7 @@ from django.test import LiveServerTestCase, TestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest
+import unittest, pdb
 
 class NewVisitorTest(StaticLiveServerTestCase):
 
@@ -44,9 +44,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
 
         # The user sees the introduction section
         sections = self.browser.find_elements_by_tag_name('section')
-        section_names = [section.id for section in sections]
-        self.assertIn('introduction', section_names)
-        introduction_section = filter(sections, lambda x: x.id == 'introduction')[0]
+        introduction_section = [x for x in sections if x.get_attribute('id') == 'introduction'][0]
         introduction_header = introduction_section.find_element_by_tag_name('h2')
         self.assertEqual('Introduction', introduction_header.text)
 
@@ -55,9 +53,8 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.assertGreaterEqual(len(paragraphs), 1)
 
         # The user scrolls down to the salaries section
-        self.assertIn('salaries', section_names)
-        salaries_section = filter(sections, lambda x: x.id == 'salaries')[0]
-        salaries_header = salaries_setion.find_element_by_tag_name('h2')
+        salaries_section = [x for x in sections if x.get_attribute('id') == 'salaries'][0]
+        salaries_header = salaries_section.find_element_by_tag_name('h2')
         self.assertEqual('Salaries', salaries_header.text)
 
         # The user reads the salaries section
@@ -65,18 +62,22 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.assertGreaterEqual(len(paragraphs), 1)
         
         # The user sees a histogram of salaries
-        salaries_histogram = salaries_section.find_element_by_id("salaries_histogram")
-        self.assertNotNone(salaries_histogram)
+        salaries_histogram = salaries_section.find_element_by_id("salaries-histogram")
+        self.assertIsNotNone(salaries_histogram)
+        self.fail('generate the histogram')
 
         # The user sees a heat map of the salaries as a function of geolocation
-        salaries_geoloc = salaries_section.find_element_by_id("salaries_by_geolocation")
-        self.assertNotNone(salaries_geoloc)
+        salaries_geoloc = salaries_section.find_element_by_id("salaries-by-geolocation")
+        self.assertIsNotNone(salaries_geoloc)
+        self.fail('generate the histogram')
 
         # User sees a bar chart of skills vs mean salary
-        salaries_skills = salaries_section.find_element_by_id("salaries_by_skills")
-        self.assertNotNone(salaries_skills)
+        salaries_skills = salaries_section.find_element_by_id("salaries-by-skills")
+        self.assertIsNotNone(salaries_skills)
+        self.fail('generate the histogram')
 
-        
+        # User continues...
+        self.fail('finish test!!!')
 
 #     def check_for_row_in_list_table(self, row_text):
 #         table = self.browser.find_element_by_id('id_list_table')
