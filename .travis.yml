@@ -9,8 +9,8 @@ before_install:
   - sudo apt-get install liblapack-dev
   - sudo apt-get install gfortran
 install:
-  - travis_wait pip install scipy
-  - "pip install -r requirements.txt"
+  - pip install django
+  - pip install selenium
 # command to run tests
 script: python manage.py test
 notifications:
