@@ -17,4 +17,5 @@ class JobListing(models.Model):
     added = models.DateField()
     noted = models.CharField(max_length=100)
 
-
+    def __str__(self):
+        return '{}: {}: {}'.format(self.__class__.__name__, self.jobid, self.title)
