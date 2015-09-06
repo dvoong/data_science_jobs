@@ -19,4 +19,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^$', 'data_science_jobs.views.home_page'),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^daily-summary$', 'data_science_jobs.data_aggregation.views.daily_summary'),
 ]

@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'data_science_jobs',
     'data_exploration',
     'data_science_jobs.scraping',
+    'data_science_jobs.data_aggregation',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -12,6 +12,7 @@ class JobListing(django.db.models.Model):
     job_type = models.CharField(max_length=100)
     salary = models.CharField(max_length=300)
     link = models.URLField()
+
     def __str__(self):
         return '{}: {}: {}'.format(self.__class__.__name__, self.jobid, self.title)
     pass
