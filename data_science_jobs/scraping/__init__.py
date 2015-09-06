@@ -1,0 +1,151 @@
+import dateutil
+import requests
+import datetime
+from data_science_jobs.models import JobListing
+from data_science_jobs.scraping.models import Session
+from lxml import html
+from django.utils import timezone
+
+class JobCreationFailed(Exception):
+    pass
+
+def get_table(response):
+    tree = html.fromstring(response.content)
+    table = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[7]/table')[0]
+    return table
+    
+def get_rows(table):
+    rows = table.findall('tr')[1:]
+    return rows
+
+def get_link(row):
+    column_element = row.findall('td')[2]
+    link_element = column_element.find('a')
+    link_text = link_element.attrib['href']
+    return link_text
+
+def create_job_listing(link):
+    response = requests.get(link)
+    tree = html.fromstring(response.content)
+    job = {}
+    try:
+        job['jobid'] = int(tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[1]')[0].text)
+    except IndexError:
+        try:
+            job['jobid'] = int(tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[3]/dl/dd[1]')[0].text)
+        except IndexError:
+            raise JobCreationFailed('Could not find the job id:', link)
+    try:
+        job['title'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[5]/div[2]/h2[2]')[0].text_content()
+    except IndexError:
+        raise JobCreationFailed('Could not find the job title:', link)
+    try:
+        job['description'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[5]/div[2]/div[1]')[0].text_content()
+    except IndexError:
+        raise JobCreationFailed('Could not find the job description:', link)
+    try:
+        job['company'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[5]/div[2]/h2[1]')[0].text_content()
+    except IndexError:
+        pass
+    try:
+        job['added'] = dateutil.parser.parse(tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[2]')[0].text_content())
+    except IndexError:
+        pass
+    try:
+        job['location'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[3]')[0].text_content()
+    except IndexError:
+        pass
+    try:
+        job['industry'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[4]')[0].text_content()
+    except IndexError:
+        pass
+    try:
+        job['job_type'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[5]')[0].text_content()
+    except IndexError:
+        pass
+    try:
+        job['salary'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[6]')[0].text_content()
+    except IndexError:
+        pass
+    job['link'] = link
+    job = JobListing(**job)
+    return job
+        
+def get_job_links(response):
+    table = get_table(response)
+    rows = get_rows(table)
+    links = []
+    for row in rows:
+        link = get_link(row)
+        links.append(link)
+    return links
+
+def populate_db(response):
+    job_links = get_job_links(response)
+    failed_jobs = []
+    for job_link in job_links:
+        try:
+            job_listing = create_job_listing(job_link)
+            job_listing.save()
+        except JobCreationFailed as e:
+            failed_jobs.append((job_link, e),)
+    return failed_jobs
+
+def get_n_pages(response):
+    tree = html.fromstring(response.content)
+    page_summary = tree.cssselect('div.pagesSummary span')[0].text
+    n_pages = int(page_summary.split(' ')[-1])
+    return n_pages
+
+def get_url(date_filter, page):
+    url_template = 'https://jobsearch.direct.gov.uk/JobSearch/PowerSearch.aspx?redirect=http%3A%2F%2Fjobsearch.direct.gov.uk%2Fhome.aspx&pp=25&sort=rv.dt.di&re=3&tm={date_filter}&pg={page_number}&q=%22Data%20Science%22'
+    return url_template.format(page_number=page, date_filter=date_filter)
+
+def get_days_between(first, second):
+    if first != None and second != None:
+        return (second - first).days
+
+def get_now():
+    return timezone.now()
+
+def get_days_since_last_scrape(last_session):
+    if last_session:
+        today = datetime.datetime.today().date()
+        timedelta = today - last_session.datetime.date
+        return timedelta.days
+
+def get_date_filter(days_since):
+    if days_since == 0:
+        return 0
+    if days_since == 1:
+        return 1
+    elif days_since > 1 and days_since <= 3:
+        return 3
+    elif days_since > 3 and days_since <= 7:
+        return 7
+    elif days_since > 7 and days_since <= 14:
+        return 14
+    elif days_since > 14 and days_since <= 30:
+        return 30
+    return -1
+
+class Scraper(object):
+
+    def scrape(self):
+        session = Session(datetime=datetime.datetime.now())
+        url = get_url(date_filter=self.date_filter, page=1)
+        response = requests.get(url)
+        n_pages = get_n_pages(response)
+        failed_jobs = populate_db(response)
+        for page in range(2, n_pages + 1):
+            url = get_url(date_filter=self.date_filter, page=page)
+            response = requests.get(url)
+            failed_jobs.extend(populate_db(response))
+        session.save()
+        print 'failed_jobs:'
+        for j, e in failed_jobs:
+            print e
+
+    def configure(self, next_session_datetime, last_session):
+        days_since = get_days_between(last_session.datetime if last_session else None, next_session_datetime)
+        self.date_filter = get_date_filter(days_since)

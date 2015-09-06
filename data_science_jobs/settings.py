@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'data_science_jobs',
     'data_exploration',
+    'data_science_jobs.scraping',
 )
 
 MIDDLEWARE_CLASSES = (
