@@ -44,4 +44,26 @@ class GetNPostsTest(TestCase):
         n_posts = JobListing.get_n_posts(datetime.datetime(2015, 9, 3).date())
         self.assertEqual(n_posts, 0)
             
+    def test_get_n_posts_returns_n_job_listings_for_m_month(self):
+        
+        job1 = JobListing.objects.create(jobid=1,
+                                         title='Title 1',
+                                         description='Description 1',
+                                         added=datetime.datetime(2015, 8, 1).date())
+        job2 = JobListing.objects.create(jobid=2,
+                                         title='Title 2',
+                                         description='Description 2',
+                                         added=datetime.datetime(2015, 9, 2).date())
+        job3 = JobListing.objects.create(jobid=3,
+                                         title='Title 3',
+                                         description='Description 3',
+                                         added=datetime.datetime(2015, 9, 2).date())
+
+        n_posts = JobListing.get_n_posts(datetime.datetime(2015, 9, 1).date(), month=True)
+        self.assertEqual(n_posts, 2)
+        n_posts = JobListing.get_n_posts(datetime.datetime(2015, 8, 1).date(), month=True)
+        self.assertEqual(n_posts, 1)
+
+        # n_posts = JobListing.get_n_posts(datetime.datetime(2015, 9, 5).date(), month=True)
+        # self.assertEqual(n_posts, 2)
         

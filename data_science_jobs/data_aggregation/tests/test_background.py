@@ -3,10 +3,48 @@ import datetime
 from data_science_jobs import scraping
 from data_science_jobs.models import JobListing
 from data_science_jobs.data_aggregation import background
-from data_science_jobs.data_aggregation.models import DailySummary
+from data_science_jobs.data_aggregation.models import DailySummary, MonthlySummary
 from django.test import TestCase
 from django.utils import timezone
 
+class UpdateMonthlySummariesIntegratedTest(TestCase):
+
+    def test_uses_job_listings_to_create_monthly_summary(self):
+
+        job1 = JobListing.objects.create(
+            jobid=1,
+            title='title1',
+            description='description1',
+            added=datetime.datetime(year=2015, month=9, day=1).date())
+        
+        job2 = JobListing.objects.create(
+            jobid=2,
+            title='title2',
+            description='description2',
+        added=datetime.datetime(year=2015, month=8, day=2).date())
+        
+        job3 = JobListing.objects.create(
+            jobid=3,
+            title='title3',
+            description='description3',
+        added=datetime.datetime(year=2015, month=8, day=17).date())
+
+        session = scraping.models.Session.objects.create(datetime=datetime.datetime(year=2015, month=10, day=3))
+
+        background.update_monthly_summaries()
+
+        monthly_summary1 = MonthlySummary.objects.first()
+        monthly_summary2 = MonthlySummary.objects.last()
+
+        self.assertEqual(monthly_summary1.date, datetime.datetime(2015, 8, 1).date())
+        self.assertEqual(monthly_summary2.date, datetime.datetime(2015, 9, 1).date())
+        self.assertEqual(monthly_summary1.n_posts, 2)
+        self.assertEqual(monthly_summary2.n_posts, 1)
+
+class UpdatedMonthlySummariesUnitTest(TestCase):
+
+    pass
+        
 class UpdateDailySummariesIntegratedTest(TestCase):
 
     def test_uses_job_listings_to_create_daily_summary(self):

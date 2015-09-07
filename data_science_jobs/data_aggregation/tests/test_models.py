@@ -1,7 +1,7 @@
 import datetime
 import mock
 from data_science_jobs.models import JobListing
-from data_science_jobs.data_aggregation.models import DailySummary
+from data_science_jobs.data_aggregation.models import DailySummary, MonthlySummary
 from django.test import TestCase
 
 class DailySummaryTest(TestCase):

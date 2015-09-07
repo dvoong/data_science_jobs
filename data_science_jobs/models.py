@@ -18,8 +18,11 @@ class JobListing(django.db.models.Model):
         return cls.objects.order_by('added').first()
     
     @classmethod
-    def get_n_posts(cls, date):
+    def get_n_posts(cls, date, month=False):
+        if month == True:
+            return len(cls.objects.filter(added__year=date.year, added__month=date.month))
         return len(cls.objects.filter(added=date))
+
 
     def __str__(self):
         return '{}: {}: {}'.format(self.__class__.__name__, self.jobid, self.title)

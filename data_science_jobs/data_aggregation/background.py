@@ -1,7 +1,7 @@
 import datetime
 import data_science_jobs
 from  data_science_jobs.scraping.models import Session as ScrapingSession
-from data_science_jobs.data_aggregation.models import DailySummary
+from data_science_jobs.data_aggregation.models import DailySummary, MonthlySummary
 from data_science_jobs.models import JobListing
 
 def update_daily_summaries():
@@ -19,4 +19,25 @@ def update_daily_summaries():
     for date in dates_between:
         daily_summary = DailySummary.create(date=date)
         daily_summary.save()
+
+def update_monthly_summaries():
+
+    previous_session = ScrapingSession.get_previous_session()
+    if previous_session == None:
+        return
+    last_summary = MonthlySummary.get_last_summary()
+    if last_summary == None:
+        start_date = JobListing.get_earliest_job_listing().added
+        start_date = start_date - datetime.timedelta(start_date.day)
+        start_date = datetime.datetime(year=start_date.year, month=start_date.month, day=1).date()
+    else:
+        start_date = last_summary.date
+    previous_session_month = previous_session.datetime.date()
+    previous_session_month = previous_session_month - datetime.timedelta(days=previous_session_month.day - 1)
+    months_between = data_science_jobs.get_months_between(
+        start_date,
+        previous_session.datetime.date())
+    for date in months_between:
+        monthly_summary = MonthlySummary.create(date=date)
+        monthly_summary.save()
 

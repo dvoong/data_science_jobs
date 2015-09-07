@@ -16,3 +16,18 @@ class DailySummary(Model):
     def get_last_summary(cls):
         return cls.objects.order_by('date').last()
 
+class MonthlySummary(Model):
+
+    date = DateField()
+    n_posts = IntegerField()
+
+    @classmethod
+    def create(cls, date):
+        n_posts = JobListing.get_n_posts(date, month=True)
+        monthly_summary = cls(date=date, n_posts=n_posts)
+        return monthly_summary
+
+    @classmethod
+    def get_last_summary(cls):
+        return cls.objects.order_by('date').last()
+    
