@@ -13,6 +13,14 @@ class JobListing(django.db.models.Model):
     salary = models.CharField(max_length=300)
     link = models.URLField()
 
+    @classmethod
+    def get_earliest_job_listing(cls):
+        return cls.objects.order_by('added').first()
+    
+    @classmethod
+    def get_n_posts(cls, date):
+        return len(cls.objects.filter(added=date))
+
     def __str__(self):
         return '{}: {}: {}'.format(self.__class__.__name__, self.jobid, self.title)
     pass

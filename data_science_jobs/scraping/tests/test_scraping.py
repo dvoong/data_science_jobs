@@ -143,7 +143,7 @@ class TestMain(unittest.TestCase):
         mock_sleep.assert_has_calls([mock.call(86400)])
 
 @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.parse_date')
-@mock.patch('datetime.datetime')
+@mock.patch('data_science_jobs.scraping.management.commands.start_scraper.timezone')
 class TestConvertStartToDatetime(unittest.TestCase):
 
     def test_start_is_none_returns_now(self, mock_datetime, mock_parse):
