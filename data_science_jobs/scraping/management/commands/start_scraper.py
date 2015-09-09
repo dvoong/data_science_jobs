@@ -38,4 +38,5 @@ class Command(BaseCommand):
             previous_session = Session.get_previous_session()
             scraper.configure(start_datetime, previous_session)
             scraper.scrape()
-            wait_till_next_session(options['frequency'])
+            next_datetime = start_datetime + datetime.timedelta(seconds=options['frequency'])
+            wait_till_next_session((next_datetime - timezone.now()).total_seconds())

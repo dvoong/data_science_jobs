@@ -78,7 +78,7 @@ class ErrorAfter(object):
         self.limit = limit
         self.calls = 0
         
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         self.calls += 1
         if self.calls > self.limit:
             raise CallableExhausted
@@ -86,36 +86,52 @@ class ErrorAfter(object):
 class CallableExhausted(Exception):
     pass
             
-class TestMain(unittest.TestCase):
+@mock.patch('data_science_jobs.scraping.management.commands.start_scraper.timezone')
+@mock.patch('data_science_jobs.scraping.management.commands.start_scraper.convert_start_to_datetime')
+@mock.patch('data_science_jobs.scraping.management.commands.start_scraper.Scraper')
+@mock.patch('data_science_jobs.scraping.management.commands.start_scraper.wait_till_start_time')
+@mock.patch('data_science_jobs.scraping.management.commands.start_scraper.datetime')
+@mock.patch('data_science_jobs.scraping.management.commands.start_scraper.wait_till_next_session')
+class HandleTest(unittest.TestCase):
 
-    # @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.wait_till_next_session')
-    # def test_integrated(self, mock_wait_till_next_session):
+    def test_handle_calls_convert_start_time(self, wait_till_next_session,
+                                             datetime,
+                                             wait_till_start_time,
+                                             Scraper,
+                                             convert_start_to_datetime,
+                                             timezone):
 
-    #     mock_wait_till_next_session.side_effect = ErrorAfter(0)
-        
-    #     command = Command()
-    #     command.handle(**{'start': None, 'frequency': 86400})
+        wait_till_next_session.side_effect = ErrorAfter(0)
 
-    #     self.assertEqual(len(Session.objects.all()), 1)
+        command = Command()
+        try:
+            command.handle(**{'start': None, 'frequency': 86400})
+        except CallableExhausted:
+            pass
 
-    @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.convert_start_to_datetime')
-    @mock.patch('data_science_jobs.scraping.models.Session.get_previous_session')
-    @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.Scraper')
-    @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.wait_till_start_time')
-    @mock.patch('time.sleep')
-    def test_main(self, mock_sleep, mock_wait_till_start, mock_Scraper, mock_get_previous_session, mock_convert_start):
+        convert_start_to_datetime.assert_called_once_with(start=None)
 
-        # process the arguments
-        mock_start_time = mock.Mock()
-        mock_convert_start.return_value = mock_start_time
-        # initialises a scraper with the previous session
-        mock_scraper = mock.Mock()
-        mock_Scraper.return_value = mock_scraper
-        # get the previous session
-        mock_previous_session = mock.Mock()
-        mock_get_previous_session.return_value = mock_previous_session
-        # exit loop gracefully
-        mock_scraper.scrape.side_effect = ErrorAfter(2)
+    def test_scraper_object_created(self, wait_till_next_session, datetime, wait_till_start_time, Scraper, *args, **kwargs):
+
+        wait_till_next_session.side_effect = ErrorAfter(0)
+
+        command = Command()
+        try:
+            command.handle(**{'start': None, 'frequency': 86400})
+        except CallableExhausted:
+            pass
+
+        Scraper.assert_called_once_with()
+
+    def test_waits_till_start_time_called(self,
+                                          wait_till_next_session,
+                                          datetime,
+                                          wait_till_start_time,
+                                          Scraper,
+                                          convert_start_to_datetime,
+                                          timezone):
+
+        wait_till_next_session.side_effect = ErrorAfter(0)
 
         command = Command()
         try:
@@ -123,25 +139,91 @@ class TestMain(unittest.TestCase):
         except CallableExhausted:
             pass
         
-        # process the arguments
-        mock_convert_start.assert_called_once_with(start=None)
-        # initialises a scraper with the previous session
-        mock_Scraper.assert_called_once_with()
-        # wait until start time
-        mock_wait_till_start.assert_called_once_with(mock_start_time)
-        # get the previous session
-        mock_get_previous_session.assert_has_calls([mock.call(), mock.call(), mock.call()])
-        # configure the scraper with the last session
-        mock_scraper.configure.assert_has_calls([
-            mock.call(mock_start_time, mock_previous_session),
-            mock.call(mock_start_time, mock_previous_session),
-            mock.call(mock_start_time, mock_previous_session),
-        ])
-        # start the scraper
-        mock_scraper.scrape.assert_has_calls([mock.call(), mock.call()])
-        # repeat scraper after each interval
-        mock_sleep.assert_has_calls([mock.call(86400)])
+        wait_till_start_time.assert_called_once_with(convert_start_to_datetime.return_value)
 
+    @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.Session')
+    def test_get_previous_session_called(self,
+                                         Session,
+                                         wait_till_next_session,
+                                         datetime,
+                                         wait_till_start_time,
+                                         Scraper,
+                                         convert_start_to_datetime,
+                                         timezone):
+        
+        wait_till_next_session.side_effect = ErrorAfter(2)
+
+        command = Command()
+        try:
+            command.handle(**{'start': None, 'frequency': 86400})
+        except CallableExhausted:
+            pass
+        
+        Session.get_previous_session.assert_has_calls([mock.call(), mock.call(), mock.call()])
+        
+    @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.Session')
+    def test_scraper_calls_configure(self,
+                                     Session,
+                                     wait_till_next_session,
+                                     datetime,
+                                     wait_till_start_time,
+                                     Scraper,
+                                     convert_start_to_datetime,
+                                     timezone):
+
+        wait_till_next_session.side_effect = ErrorAfter(2)
+
+        command = Command()
+        try:
+            command.handle(**{'start': None, 'frequency': 86400})
+        except CallableExhausted:
+            pass
+
+        Scraper().configure.assert_has_calls([
+            mock.call(convert_start_to_datetime.return_value, Session.get_previous_session.return_value),
+            mock.call(convert_start_to_datetime.return_value, Session.get_previous_session.return_value),
+            mock.call(convert_start_to_datetime.return_value, Session.get_previous_session.return_value),
+        ])
+
+    def test_scraper_calls_scrape(self,
+                                  wait_till_next_session,
+                                  datetime,
+                                  wait_till_start_time,
+                                  Scraper,
+                                  convert_start_to_datetime,
+                                  timezone):
+        
+        wait_till_next_session.side_effect = ErrorAfter(2)
+        
+        command = Command()
+        try:
+            command.handle(**{'start': None, 'frequency': 86400})
+        except CallableExhausted:
+            pass
+
+        Scraper().scrape.assert_has_calls([
+            mock.call(),
+            mock.call(),
+            mock.call()])
+
+    def test_waits_till_next_session(self,
+                                     wait_till_next_session,
+                                     datetime,
+                                     wait_till_start_time,
+                                     Scraper,
+                                     convert_start_to_datetime,
+                                     timezone):
+    
+        wait_till_next_session.side_effect = ErrorAfter(2)
+        
+        command = Command()
+        try:
+            command.handle(**{'start': None, 'frequency': 86400})
+        except CallableExhausted:
+            pass
+        
+        self.assertEqual(wait_till_next_session.call_count, 3)
+        
 @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.parse_date')
 @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.timezone')
 class TestConvertStartToDatetime(unittest.TestCase):
