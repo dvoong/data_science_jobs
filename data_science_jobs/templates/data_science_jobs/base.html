@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'data_science_jobs/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
+    {% block internal_stylesheet %}{% endblock %}
+  </head>
+  <body>
+    
+    {% block content %}
+    {% endblock %}
+    
+    {# {% include "davidvoong/footer.html" %} #}
+    
+    <script src="{% static 'jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'data_science_jobs/base.js' %}"></script>
+    
+  </body>
+  
+</html>

@@ -1,20 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Analysis of Data Science Jobs</title>
-  </head>
-  <body>
-    <h1>Analysis of Data Science Jobs</h1>
-    <section id="introduction">
-      <h2>Introduction</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae nunc eu nunc sodales vulputate ac tincidunt turpis. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi id nisl quam. Donec ornare pellentesque ligula, non vulputate sem finibus eget. Duis et commodo arcu. Aliquam ac ligula justo. Etiam bibendum magna eget elit tristique porttitor. Nam vel justo eu magna varius faucibus.</p>
-    </section>
-    <section id="salaries">
-      <h2>Salaries</h2>
-      <p>Aliquam tincidunt hendrerit metus non molestie. Suspendisse eu vulputate dui. Vivamus sodales facilisis lectus. Phasellus sit amet elit in mi aliquam suscipit. Mauris ullamcorper libero nulla, vitae iaculis erat dapibus ut. Sed fringilla eget ex vitae tristique. Pellentesque laoreet elit ex, eget feugiat lectus molestie sit amet. Duis leo lorem, faucibus sed eros laoreet, euismod feugiat justo.</p>
-      <svg id="salaries-histogram"></svg>
-      <svg id="salaries-by-geolocation"></svg>
-      <svg id="salaries-by-skills"></svg>
-    </section>
-  </body>
-</html>
+{% extends 'data_science_jobs/base.html' %}
+
+{% block title %}Data Science Jobs{% endblock %}
+
+{% block internal_stylesheet %}
+<style>
+  <!-- body { -->
+  <!-- font-size: 2em; -->
+  <!-- } -->
+
+  .section {
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #595959;
+  }
+  
+  .navbar-brand {
+  font-size: 1.5em;
+  }
+  
+  .btn {
+  font-size: 1.5em;
+  width: 200px;
+  border-width: 2px;
+  border-color: #595959;
+  }
+
+  .btn.active {
+  background-color: #ffe599;
+  border-width: 2px;
+  border-color: #595959;
+  }
+  
+  <!-- div { -->
+  <!-- border: 1px solid black; -->
+  <!-- } -->
+
+  .col {
+  text-align: center;
+  }
+
+  .controller {
+  text-align: center;
+  margin-bottom: 1em;
+  margin-top: 1em;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% load staticfiles %}
+<!-- Static navbar -->
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+	<span class="sr-only">Toggle navigation</span>
+	<span class="icon-bar"></span>
+	<span class="icon-bar"></span>
+	<span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Data Science Jobs</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+	<li><a href="donate">Donate</a></li>
+	<li><a target="_blank" href="mailto:voong.david@gmail.com">Contact</a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container-fluid -->
+</nav>
+
+<div id="main-container" class="container">
+  <section id="overview-section">
+
+    <div class="row controller">
+      <div class="col-md-12">
+	<button class="btn btn-default active">Demand</button>
+	<button class="btn btn-default">Salary</button>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div style="padding-right: 5px" class="col col-md-8">
+	<div style="height: 410px" class="section">
+	  Number of UK Data Science Job Postings
+	</div>
+      </div>
+      <div style="padding-left: 5px" class="col col-md-4">
+	<div style="height: 410px" class="section">
+	  Filter
+	</div>
+      </div>
+    </div>
+    
+  </section>
+
+  <section id="rankings-section">
+    <div class="row controller">
+      <button class="btn btn-default active">Rankings</button>
+      <button class="btn btn-default">Trends</button>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+	Skills
+      </div>
+      <div class="col-md-6">
+	<div class="row">
+	  <div class="col-md-12">
+	    Geography
+	  </div>
+	</div>
+	<div class="row">
+	  <div class="col-md-12">
+	    Sector
+	  </div>
+	</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% endblock %}
