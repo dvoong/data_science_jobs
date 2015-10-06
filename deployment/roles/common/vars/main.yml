@@ -1,0 +1,4 @@
+project_name: datasciencejobswatch
+project_dir: /srv/{{ project_name }}
+source_dir: "{{ project_dir }}/source"
+repo_url: https://github.com/dvoong/data_science_jobs

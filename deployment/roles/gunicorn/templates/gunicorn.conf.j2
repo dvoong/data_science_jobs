@@ -1,0 +1,11 @@
+description "Gunicorn server for {{ project_name }}"
+
+start on net-device-up
+stop on shutdown
+
+respawn
+
+setuid {{ ansible_ssh_user }}
+chdir {{ source_dir }}
+
+exec {{ venv_dir }}/bin/gunicorn --bind {{ socket_path }} {{ application_name }}.wsgi:application

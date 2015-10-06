@@ -1,0 +1,32 @@
+---
+# file: roles/django/tasks/main.yml
+
+- name: Install django
+  pip: name=django virtualenv={{ venv_dir }}
+
+- name: Install lxml requirements
+  apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+  sudo: True
+  with_items:
+    - libxml2-dev
+    - libxslt-dev
+    - libz-dev 
+    - python-dev
+
+- name: install required python packages
+  pip: name={{ item }} virtualenv={{ venv_dir }}
+  with_items:
+    - python-dateutil
+    - requests
+    - lxml
+
+- name: sync the database, apply migrations, collect static content
+  django_manage:
+    command: "{{ item }}"
+    app_path: "{{ source_dir }}"
+    virtualenv: "{{ venv_dir }}"
+  with_items:
+    - syncdb
+    - migrate
+    - collectstatic
+    

@@ -1,0 +1,10 @@
+---
+# file: roles/webserver/meta/main.yml
+
+dependencies:
+  - {role: common}
+  - {role: nginx}
+  - {role: virtualenv}
+  - {role: gunicorn}
+  - {role: django}
+  

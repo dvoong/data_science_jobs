@@ -1,0 +1,1 @@
+gunicorn_service_name: "{{ project_name }}_webserver"

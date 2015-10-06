@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    server_name www.datasciencejobswatch.co.uk;
+
+    location / {
+        proxy_set_header Host $host;
+        proxy_pass http://{{ socket_path }};
+    }
+
+    location /static {
+        alias {{ static_dir }};
+    }
+
+    chunked_transfer_encoding off;
+}

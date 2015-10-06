@@ -1,0 +1,12 @@
+---
+# webservers.yml
+
+- name: Webservers Playbook
+  hosts: webservers
+  roles:
+    - webserver
+    # - common
+    # - nginx
+    # - gunicorn
+    # - django
+    # - mongoclient

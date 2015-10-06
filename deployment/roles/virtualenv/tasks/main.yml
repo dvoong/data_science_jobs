@@ -1,0 +1,7 @@
+---
+# file: roles/virtualenv/tasks/main.yml
+
+- name: Install virtualenv
+  apt: pkg=python-virtualenv update_cache=yes cache_valid_time=3600
+  sudo: True
+

@@ -1,0 +1,10 @@
+---
+# file: roles/gunicorn/tasks/main.yml
+
+- name: Install gunicorn
+  pip: name=gunicorn virtualenv={{ venv_dir }}
+
+- name: Create configuration file
+  template: src=gunicorn.conf.j2 dest=/etc/init/{{ gunicorn_service_name }}.conf
+  sudo: True
+  notify: restart gunicorn

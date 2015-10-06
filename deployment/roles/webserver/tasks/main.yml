@@ -1,0 +1,20 @@
+---
+# file: roles/webserver/tasks/main.yml
+
+# - name: Install nginx
+#   apt: pkg=nginx update_cache=yes cache_valid_time=3600
+#   sudo: True
+
+# - name: Create configuration file
+#   template: src=nginx.conf.j2 dest=/etc/nginx/sites-available/{{ nginx_conf_filename }}
+#   notify: restart nginx
+#   sudo: True
+
+# - name: Enable project in nginx
+#   file:
+#     dest: /etc/nginx/sites-enabled/default
+#     src: /etc/nginx/sites-available/{{ nginx_conf_filename }}
+#     state: link
+#   sudo: True
+#   notify: restart nginx
+  
