@@ -8,6 +8,11 @@
   <!-- font-size: 2em; -->
   <!-- } -->
 
+  h2 {
+  font-size: 1.5em;
+  font-weight: normal;
+  }
+  
   .section {
   border-radius: 5px;
   border-style: solid;
@@ -57,6 +62,19 @@
   margin-bottom: 1em;
   margin-top: 1em;
   }
+
+  #id-n-job-postings {
+  height: 410px;
+  }
+
+  #id-filter {
+  height: 410px;
+  }
+
+  #id-filter form {
+  margin-top: 100px;
+  }
+  
 </style>
 {% endblock %}
 
@@ -94,17 +112,36 @@
     </div>
     
     <div class="row">
+      
       <div style="padding-right: 5px" class="col col-md-8">
-	<div style="height: 410px" class="section">
-	  Number of UK Data Science Job Postings
+	<div id="id-n-job-postings" class="section">
+	  <h2>Number of UK Data Science Job Postings</h2>
+	  <div style="border: 1px solid green; height: 355px">
+	  </div>
 	</div>
       </div>
+      
       <div style="padding-left: 5px" class="col col-md-4">
-	<div style="height: 410px" class="section">
-	  Filter
+	<div id="id-filter" class="section">
+	  <h2>Filter</h2>
+	  <form>
+	    <div class="form-group">
+	      <label style="width: 100px; font-size: 1em; font-weight: normal;" for="location">Location</label>
+	      <input style="width: 200px; height: 30px;" id="location" placeholder="Location">
+	    </div>
+	    <div class="form-group">
+	      <label style="width: 100px; font-size: 1em; font-weight: normal;" for="skills">Skills</label>
+	      <input style="width: 200px; height: 30px;" id="skills" placeholder="Skills">
+	    </div>
+	    <div class="form-group">
+	      <label style="width: 100px; font-size: 1em; font-weight: normal;" for="sector">Sector</label>
+	      <input style="width: 200px; height: 30px;" id="sector" placeholder="Sectors">
+	    </div>
+	  </form>
 	</div>
       </div>
     </div>
+    
     
   </section>
 
@@ -133,4 +170,8 @@
   </section>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'data_science_jobs/home.js' %}"></script>
 {% endblock %}
