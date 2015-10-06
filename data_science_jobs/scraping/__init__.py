@@ -1,10 +1,13 @@
 import dateutil
 import requests
 import datetime
+import logging
 from data_science_jobs.models import JobListing
 from data_science_jobs.scraping.models import Session
 from lxml import html
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 class JobCreationFailed(Exception):
     pass
@@ -50,7 +53,7 @@ def create_job_listing(link):
     try:
         job['added'] = dateutil.parser.parse(tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[2]')[0].text_content())
     except IndexError:
-        pass
+        raise JobCreationFailed('Could not find the date added')
     try:
         job['location'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[3]')[0].text_content()
     except IndexError:
@@ -81,15 +84,17 @@ def get_job_links(response):
     return links
 
 def populate_db(response):
+    summary = {'success': [], 'failed': [], 'retry': []}
     job_links = get_job_links(response)
     failed_jobs = []
     for job_link in job_links:
         try:
             job_listing = create_job_listing(job_link)
             job_listing.save()
+            summary['success'].append(job_link)
         except JobCreationFailed as e:
-            failed_jobs.append((job_link, e),)
-    return failed_jobs
+            summary['failed'].append((job_link, e),)
+    return summary
 
 def get_n_pages(response):
     tree = html.fromstring(response.content)
@@ -132,19 +137,27 @@ def get_date_filter(days_since):
 class Scraper(object):
 
     def scrape(self):
-        session = Session(datetime=datetime.datetime.now())
+        session = Session(datetime=timezone.now())
         url = get_url(date_filter=self.date_filter, page=1)
+        logger.info('URL: {}'.format(url))
         response = requests.get(url)
         n_pages = get_n_pages(response)
-        failed_jobs = populate_db(response)
+        logger.info('n_pages: {}'.format(n_pages))
+        logger.info('page 1/{}'.format(n_pages))
+        summary = populate_db(response)
+        logger.info('{} successfully read, {} failed, {} to retry'.format(len(summary['success']), len(summary['failed']), len(summary['retry'])))
         for page in range(2, n_pages + 1):
+            logger.info('page {}/{}'.format(page, n_pages))
             url = get_url(date_filter=self.date_filter, page=page)
             response = requests.get(url)
-            failed_jobs.extend(populate_db(response))
+            summary_ = populate_db(response)
+            logger.info('{} successfully read, {} failed, {} to retry'.format(len(summary_['success']), len(summary_['failed']), len(summary_['retry'])))
+            for key, val in summary_.iteritems():
+                summary[key].extend(val)
         session.save()
-        print 'failed_jobs:'
-        for j, e in failed_jobs:
-            print e
+        if n_pages > 1:
+            logger.info('Total Summary')
+            logger.info('{} successfully read, {} failed, {} to retry'.format(len(summary['success']),len(summary['failed']), len(summary['retry'])))
 
     def configure(self, next_session_datetime, last_session):
         days_since = get_days_between(last_session.datetime if last_session else None, next_session_datetime)
