@@ -2,7 +2,7 @@
 # file: roles/common/tasks/main.yml
 
 - name: Create project dir
-  file: path="{{ project_dir }}" owner="{{ ansible_ssh_user }}" group="{{ ansible_ssh_user }}" mode=0774 state=directory
+  file: path="{{ project_dir }}" owner="{{ ansible_ssh_user }}" group=root mode=0774 state=directory
   sudo: True
 
 - name: Install git

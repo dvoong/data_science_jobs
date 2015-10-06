@@ -155,9 +155,10 @@ class Scraper(object):
             for key, val in summary_.iteritems():
                 summary[key].extend(val)
         session.save()
-        if n_pages > 1:
-            logger.info('Total Summary')
-            logger.info('{} successfully read, {} failed, {} to retry'.format(len(summary['success']),len(summary['failed']), len(summary['retry'])))
+        logger.info('----------' * 5)
+        logger.info('Total Summary')
+        logger.info('{} successfully read, {} failed, {} to retry'.format(len(summary['success']),len(summary['failed']), len(summary['retry'])))
+        logger.info('----------' * 5)
 
     def configure(self, next_session_datetime, last_session):
         days_since = get_days_between(last_session.datetime if last_session else None, next_session_datetime)

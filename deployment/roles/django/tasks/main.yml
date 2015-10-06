@@ -12,6 +12,8 @@
     - libxslt-dev
     - libz-dev 
     - python-dev
+    - libffi-dev
+    - libssl-dev
 
 - name: install required python packages
   pip: name={{ item }} virtualenv={{ venv_dir }}
@@ -19,6 +21,14 @@
     - python-dateutil
     - requests
     - lxml
+    - cssselect
+    - requests[security]
+
+- file: path="{{ database_dir }}" owner="{{ ansible_ssh_user }}" group=root mode=0774 state=directory
+  sudo: True
+
+- file: path="{{ static_dir }}" owner="{{ ansible_ssh_user }}" group=www-data mode=0774 state=directory
+  sudo: True
 
 - name: sync the database, apply migrations, collect static content
   django_manage:
@@ -26,7 +36,15 @@
     app_path: "{{ source_dir }}"
     virtualenv: "{{ venv_dir }}"
   with_items:
-    - syncdb
-    - migrate
+    # - syncdb
+    # - migrate
     - collectstatic
-    
+
+- name: Copy database
+  copy: src="../../database/db.sqlite3" dest={{ database_dir }}/db.sqlite3 
+
+- name: Create scraping service
+  template: src=templates/scraping.conf dest=/etc/init/scraping.conf
+  sudo: True
+  notify: restart scraping
+

@@ -1,0 +1,4 @@
+- name: restart scraping
+  service: name=scraping state=restarted
+  sudo: True
+  

@@ -32,6 +32,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--start', help='Start datetime, ISO 8601 format (default: now)', default=None)
         parser.add_argument('--frequency', type=int, help='Scraping Frequency in seconds (default: 1 day)', default=86400)
+        parser.add_argument('--log', type=str, help='Log filepath', default='scraper.log')
         
     def handle(self, *args, **options):
         logger.setLevel(logging.INFO)
@@ -43,7 +44,7 @@ class Command(BaseCommand):
         scraping.logger.setLevel(logging.INFO)
         scraping.logger.addHandler(handler)
         logger.propagate = False
-        file_handler = logging.FileHandler('scraping.log')
+        file_handler = logging.FileHandler(options['log'])
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
