@@ -1,6 +1,7 @@
 import time
 import datetime
 import logging
+from data_science_jobs.data_aggregation.background import update_daily_summaries, update_monthly_summaries, logger as bg_logger
 from django.utils import timezone
 from dateutil.parser import parse as parse_date
 from django.core.management.base import BaseCommand
@@ -49,6 +50,9 @@ class Command(BaseCommand):
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         scraping.logger.addHandler(file_handler)
+        bg_logger.setLevel(logging.INFO)
+        bg_logger.addHandler(handler)
+        bg_logger.addHandler(file_handler)
 
         start_datetime = convert_start_to_datetime(start=options['start'])
         scraper = Scraper()
@@ -64,6 +68,8 @@ class Command(BaseCommand):
             logger.info('Date Filter: {}'.format(scraper.date_filter))
             logger.info('Beginning Scraper:')
             scraper.scrape()
+            update_daily_summaries()
+            update_monthly_summaries()
             next_datetime = start_datetime + datetime.timedelta(seconds=options['frequency'])
             start_datetime = next_datetime
             logger.info('next scraping session: {}\n'.format(next_datetime))

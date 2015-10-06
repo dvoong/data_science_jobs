@@ -11,3 +11,6 @@
 
 - name: Get source files
   git: repo="{{ repo_url }}" dest={{ source_dir }} accept_hostkey=yes
+  notify:
+    - restart gunicorn
+    - restart scraping
