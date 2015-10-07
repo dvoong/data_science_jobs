@@ -31,6 +31,7 @@ def create_job_listing(link):
     response = requests.get(link)
     tree = html.fromstring(response.content)
     job = {}
+
     try:
         job['jobid'] = int(tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[1]')[0].text)
     except IndexError:
@@ -50,26 +51,27 @@ def create_job_listing(link):
         job['company'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[5]/div[2]/h2[1]')[0].text_content()
     except IndexError:
         pass
-    try:
-        job['added'] = dateutil.parser.parse(tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[2]')[0].text_content(), dayfirst=True)
-    except IndexError:
+
+    job_summary = tree.cssselect('div.jobViewSummary')[0]
+    dl = job_summary.cssselect('dl')[0]
+    dts = dl.cssselect('dt')
+    dds = dl.cssselect('dd')
+    descrips = zip(dts, dds)
+    for key, val in descrips:
+        if key.text.lower() == 'posting date':
+            job['added'] = dateutil.parser.parse(val.text, dayfirst=True)
+        elif key.text.lower() == 'location':
+            job['location'] = val.text
+        elif key.text.lower() == 'industries':
+            job['industry'] = val.text
+        elif key.text.lower() == 'job type':
+            job['job_type'] = val.text
+        elif key.text.lower() == 'salary':
+            job['salary'] = val.text
+
+    if 'added' not in job:
         raise JobCreationFailed('Could not find the date added')
-    try:
-        job['location'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[3]')[0].text_content()
-    except IndexError:
-        pass
-    try:
-        job['industry'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[4]')[0].text_content()
-    except IndexError:
-        pass
-    try:
-        job['job_type'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[5]')[0].text_content()
-    except IndexError:
-        pass
-    try:
-        job['salary'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[6]')[0].text_content()
-    except IndexError:
-        pass
+
     job['link'] = link
     job = JobListing(**job)
     return job
@@ -90,6 +92,7 @@ def populate_db(response):
     for job_link in job_links:
         try:
             job_listing = create_job_listing(job_link)
+            print job_listing.salary
             job_listing.save()
             summary['success'].append(job_link)
         except JobCreationFailed as e:
