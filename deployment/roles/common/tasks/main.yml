@@ -2,15 +2,10 @@
 # file: roles/common/tasks/main.yml
 
 - name: Create project dir
-  file: path="{{ project_dir }}" owner="{{ ansible_ssh_user }}" group=root mode=0774 state=directory
+  file: path="{{ project_dir }}" owner="{{ ansible_ssh_user }}" group=root mode=0775 state=directory
   sudo: True
 
 - name: Install git
   apt: pkg=git update_cache=yes cache_valid_time=3600
   sudo: True
 
-- name: Get source files
-  git: repo="{{ repo_url }}" dest={{ source_dir }} accept_hostkey=yes
-  notify:
-    - restart gunicorn
-    - restart scraping

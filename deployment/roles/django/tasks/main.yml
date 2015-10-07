@@ -1,6 +1,12 @@
 ---
 # file: roles/django/tasks/main.yml
 
+- name: Get source files
+  git: repo="{{ repo_url }}" dest={{ source_dir }} accept_hostkey=yes
+  notify:
+    - restart gunicorn
+    - restart scraping
+
 - name: Install django
   pip: name=django virtualenv={{ venv_dir }}
 
@@ -24,11 +30,9 @@
     - cssselect
     - requests[security]
 
-- file: path="{{ database_dir }}" owner="{{ ansible_ssh_user }}" group=root mode=0774 state=directory
-  sudo: True
+- file: path="{{ database_dir }}" owner="{{ ansible_ssh_user }}" mode=0775 state=directory
 
-- file: path="{{ static_dir }}" owner="{{ ansible_ssh_user }}" group=www-data mode=0774 state=directory
-  sudo: True
+- file: path="{{ static_dir }}" owner="{{ ansible_ssh_user }}" mode=0775 state=directory
 
 - name: sync the database, apply migrations, collect static content
   django_manage:
@@ -36,12 +40,16 @@
     app_path: "{{ source_dir }}"
     virtualenv: "{{ venv_dir }}"
   with_items:
-    # - syncdb
-    # - migrate
+    - syncdb
+    - migrate
     - collectstatic
 
-- name: Copy database
-  copy: src="../../database/db.sqlite3" dest={{ database_dir }}/db.sqlite3 
+# - name: Copy database
+#   copy: src="../../database/db.sqlite3" dest={{ database_dir }}/db.sqlite3
+
+# - name: Change ownership of static files dir to give access to nginx
+#   file: path={{ static_dir }} owner=www-data recurse=yes state=directory
+#   sudo: True
 
 - name: Create scraping service
   template: src=templates/scraping.conf dest=/etc/init/scraping.conf
