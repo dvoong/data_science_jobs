@@ -8,7 +8,7 @@ from data_science_jobs.models import JobListing
 logger = logging.getLogger(__name__)
 
 def update_daily_summaries():
-    logger.info('Update Daily Summaries: {}'.format(previous_session.datetime))
+    logger.info('Update Daily Summaries')
     previous_session = ScrapingSession.get_previous_session()
     logger.info('Previous Scraping Session: {}'.format(previous_session.datetime))
     if previous_session == None:
@@ -27,13 +27,12 @@ def update_daily_summaries():
     else:
         logger.info('Daily Summaries Up-To-Date')
     for date in dates_between:
-        logger.info('Creating daily summary for date: {}'.format(date))
         daily_summary = DailySummary.create(date=date)
-        logger.info('n_posts: {}'.format(daily_summary.n_posts))
+        logger.info('{}: n_posts: {}'.format(date, daily_summary.n_posts))
         daily_summary.save()
 
 def update_monthly_summaries():
-    logger.info('Update Monthly Summaries: {}'.format(previous_session.datetime))
+    logger.info('Update Monthly Summaries')
     previous_session = ScrapingSession.get_previous_session()
     logger.info('Previous Scraping Session: {}'.format(previous_session.datetime))
     if previous_session == None:
@@ -53,8 +52,7 @@ def update_monthly_summaries():
         previous_session.datetime.date())
     logger.info('Months between: {}'.format(months_between))
     for date in months_between:
-        logger.info('Creating monthly summary for date: {}'.format(date))
         monthly_summary = MonthlySummary.create(date=date)
-        logger.info('n_posts: {}'.format(monthly_summary.n_posts))
+        logger.info('{}: n_posts: {}'.format(date, monthly_summary.n_posts))
         monthly_summary.save()
 
