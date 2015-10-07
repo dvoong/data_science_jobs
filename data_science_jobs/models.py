@@ -23,8 +23,7 @@ class JobListing(django.db.models.Model):
             return len(cls.objects.filter(added__year=date.year, added__month=date.month))
         return len(cls.objects.filter(added=date))
 
-
     def __str__(self):
-        return '{}: {}: {}'.format(self.__class__.__name__, self.jobid, self.title)
+        return '{}: {}: {}'.format(self.__class__.__name__, self.jobid, self.title.encode('utf8'))
     pass
 

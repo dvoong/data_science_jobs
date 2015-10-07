@@ -41,6 +41,10 @@ def create_job_listing(link):
             raise JobCreationFailed('Could not find the job id:', link)
     try:
         job['title'] = tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[5]/div[2]/h2[2]')[0].text_content()
+        try:
+            job['title'] = job['title'].encode('latin-1').decode('utf8')
+        except UnicodeDecodeError:
+            pass
     except IndexError:
         raise JobCreationFailed('Could not find the job title:', link)
     try:
