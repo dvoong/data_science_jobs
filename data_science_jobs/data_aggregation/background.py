@@ -8,12 +8,13 @@ from data_science_jobs.models import JobListing
 logger = logging.getLogger(__name__)
 
 def update_daily_summaries():
+    logger.info('Update Daily Summaries: {}'.format(previous_session.datetime))
     previous_session = ScrapingSession.get_previous_session()
     logger.info('Previous Scraping Session: {}'.format(previous_session.datetime))
     if previous_session == None:
         return
     last_summary = DailySummary.get_last_summary()
-    logger.info('Last Daily Summary: {}'.format(last_summary.date))    
+    logger.info('Last Daily Summary: {}'.format(last_summary.date if last_summary else None))    
     if last_summary == None:
         start_date = JobListing.get_earliest_job_listing().added - datetime.timedelta(days=1)
     else:
@@ -32,12 +33,13 @@ def update_daily_summaries():
         daily_summary.save()
 
 def update_monthly_summaries():
+    logger.info('Update Monthly Summaries: {}'.format(previous_session.datetime))
     previous_session = ScrapingSession.get_previous_session()
     logger.info('Previous Scraping Session: {}'.format(previous_session.datetime))
     if previous_session == None:
         return
     last_summary = MonthlySummary.get_last_summary()
-    logger.info('Last Monthly Summary: {}'.format(last_summary.date))
+    logger.info('Last Monthly Summary: {}'.format(last_summary.date if last_summary else last_summary))
     if last_summary == None:
         start_date = JobListing.get_earliest_job_listing().added
         start_date = start_date - datetime.timedelta(days=start_date.day)
