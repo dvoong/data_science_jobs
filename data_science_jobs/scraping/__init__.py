@@ -51,7 +51,7 @@ def create_job_listing(link):
     except IndexError:
         pass
     try:
-        job['added'] = dateutil.parser.parse(tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[2]')[0].text_content())
+        job['added'] = dateutil.parser.parse(tree.xpath('//*[@id="aspnetForm"]/div/div[2]/div[4]/div/div[4]/dl/dd[2]')[0].text_content(), dayfirst=True)
     except IndexError:
         raise JobCreationFailed('Could not find the date added')
     try:
