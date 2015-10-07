@@ -92,7 +92,6 @@ def populate_db(response):
     for job_link in job_links:
         try:
             job_listing = create_job_listing(job_link)
-            print job_listing.salary
             job_listing.save()
             summary['success'].append(job_link)
         except JobCreationFailed as e:
