@@ -126,11 +126,14 @@ def get_days_since_last_scrape(last_session):
         return timedelta.days
 
 def get_date_filter(days_since):
-    if days_since == 0:
-        return 0
-    if days_since == 1:
-        return 1
-    elif days_since > 1 and days_since <= 3:
+    # if days_since == 0:
+    #     return 0
+    # if days_since == 1:
+    #     return 1
+    # elif days_since > 1 and days_since <= 3:
+    #     return 3
+    # ensure previous days are rescraped because the jobsearch site is weird
+    if days_since <= 3:
         return 3
     elif days_since > 3 and days_since <= 7:
         return 7
