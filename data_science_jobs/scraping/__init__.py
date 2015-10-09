@@ -114,7 +114,7 @@ def get_url(date_filter, page):
 
 def get_days_between(first, second):
     if first != None and second != None:
-        return (second - first).days
+        return (second.date() - first.date()).days
 
 def get_now():
     return timezone.now()
@@ -143,6 +143,7 @@ def get_date_filter(days_since):
 class Scraper(object):
 
     def scrape(self):
+        logger.info('Beginning Scraper:')
         session = Session(datetime=timezone.now())
         url = get_url(date_filter=self.date_filter, page=1)
         logger.info('URL: {}'.format(url))
@@ -167,5 +168,8 @@ class Scraper(object):
         logger.info('----------' * 5)
 
     def configure(self, next_session_datetime, last_session):
+        logger.info('Configuring scraper')
         days_since = get_days_between(last_session.datetime if last_session else None, next_session_datetime)
+        logger.info('Days since last scrape: {}'.format(days_since))
         self.date_filter = get_date_filter(days_since)
+        logger.info('Date Filter: {}'.format(self.date_filter))
