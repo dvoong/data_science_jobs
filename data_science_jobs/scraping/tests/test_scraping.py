@@ -48,7 +48,7 @@ class TestGetDateFilter(unittest.TestCase):
 
     def test_days(self):
         test_vals = [
-            (1, 1),
+            (1, 3),
             (2, 3),
             (3, 3),
             (4, 7),
@@ -66,7 +66,7 @@ class TestGetDateFilter(unittest.TestCase):
 
         for days, expected_filter in test_vals:
             output = scraping.get_date_filter(days)
-            self.assertEqual(output, expected_filter)
+            self.assertEqual(output, expected_filter, msg='days_since: {}, filter: {}, expected_filter: {}'.format(days, output, expected_filter))
 
 class ErrorAfter(object):
     '''
@@ -105,7 +105,7 @@ class HandleTest(unittest.TestCase):
 
         command = Command()
         try:
-            command.handle(**{'start': None, 'frequency': 86400})
+            command.handle(**{'start': None, 'frequency': 86400, 'log': 'scraper.log'})
         except CallableExhausted:
             pass
 
@@ -117,7 +117,7 @@ class HandleTest(unittest.TestCase):
 
         command = Command()
         try:
-            command.handle(**{'start': None, 'frequency': 86400})
+            command.handle(**{'start': None, 'frequency': 86400, 'log': 'scraper.log'})
         except CallableExhausted:
             pass
 
@@ -135,7 +135,7 @@ class HandleTest(unittest.TestCase):
 
         command = Command()
         try:
-            command.handle(**{'start': None, 'frequency': 86400})
+            command.handle(**{'start': None, 'frequency': 86400, 'log': 'scraper.log'})
         except CallableExhausted:
             pass
         
@@ -155,11 +155,11 @@ class HandleTest(unittest.TestCase):
 
         command = Command()
         try:
-            command.handle(**{'start': None, 'frequency': 86400})
+            command.handle(**{'start': None, 'frequency': 86400, 'log': 'scraper.log'})
         except CallableExhausted:
             pass
         
-        Session.get_previous_session.assert_has_calls([mock.call(), mock.call(), mock.call()])
+        Session.get_previous_session.assert_has_calls([mock.call(), mock.call(), mock.call()], any_order=True)
         
     @mock.patch('data_science_jobs.scraping.management.commands.start_scraper.Session')
     def test_scraper_calls_configure(self,
@@ -172,16 +172,15 @@ class HandleTest(unittest.TestCase):
                                      timezone):
 
         wait_till_next_session.side_effect = ErrorAfter(2)
+        timezone.now.return_value.__gt__.return_value = False
 
         command = Command()
         try:
-            command.handle(**{'start': None, 'frequency': 86400})
+            command.handle(**{'start': None, 'frequency': 86400, 'log': 'scraper.log'})
         except CallableExhausted:
             pass
 
         Scraper().configure.assert_has_calls([
-            mock.call(convert_start_to_datetime.return_value, Session.get_previous_session.return_value),
-            mock.call(convert_start_to_datetime.return_value, Session.get_previous_session.return_value),
             mock.call(convert_start_to_datetime.return_value, Session.get_previous_session.return_value),
         ])
 
@@ -197,7 +196,7 @@ class HandleTest(unittest.TestCase):
         
         command = Command()
         try:
-            command.handle(**{'start': None, 'frequency': 86400})
+            command.handle(**{'start': None, 'frequency': 86400, 'log': 'scraper.log'})
         except CallableExhausted:
             pass
 
@@ -218,7 +217,7 @@ class HandleTest(unittest.TestCase):
         
         command = Command()
         try:
-            command.handle(**{'start': None, 'frequency': 86400})
+            command.handle(**{'start': None, 'frequency': 86400, 'log': 'scraper.log'})
         except CallableExhausted:
             pass
         
@@ -325,52 +324,53 @@ class TestConfigureScraper(django.test.TestCase):
         self.assertEqual(self.scraper.date_filter, mock_date_filter)
 
 @mock.patch('data_science_jobs.scraping.get_url')
-@mock.patch('requests.get')
-@mock.patch('data_science_jobs.scraping.get_n_pages')
 @mock.patch('data_science_jobs.scraping.populate_db')
-class TestScrape(django.test.TestCase):
+@mock.patch('data_science_jobs.scraping.get_n_pages')
+@mock.patch('data_science_jobs.scraping.requests')
+@mock.patch('data_science_jobs.scraping.Session')
+class TestScrapeExecution(django.test.TestCase):
 
-    def test_main(self, mock_populate_db, mock_get_n_pages, mock_requests_get, mock_get_url):
+    def setUp(self):
 
-        # get url for page 1
-        mock_url = mock.Mock()
-        mock_get_url.side_effect = [mock_url]
-        # get response for page 1
-        mock_response = mock.Mock()
-        mock_requests_get.side_effect = [mock_response] # will need more responses later
-        # get n pages
-        mock_n_pages = 2
-        mock_get_n_pages.return_value = mock_n_pages
-        # populate database with response from page 1
-        # get url for page i
-        mock_url_2 = mock.Mock()
-        mock_get_url.side_effect = [mock_url, mock_url_2]
-        # get response for page i
-        mock_response_2 = mock.Mock()
-        mock_requests_get.side_effect = [mock_response, mock_response_2]
-        # populate database with response from page i
+        self.scraper = scraping.Scraper()
+        self.scraper.date_filter = 3
 
-        scraper = scraping.Scraper()
-        scraper.date_filter = 1
-        scraper.scrape()
+    def test_creates_and_saves_session_if_successful(self, Session, requests, get_n_pages, populate_db, get_url):
 
-        # get urls
-        mock_get_url.assert_has_calls([
-            mock.call(date_filter=scraper.date_filter, page=1),
-            mock.call(date_filter=scraper.date_filter, page=2),
-        ])
-        # get responses
-        mock_requests_get.assert_has_calls([
-            mock.call(mock_url),
-            mock.call(mock_url_2)
-        ])
-        # get n pages
-        mock_get_n_pages.assert_called_once_with(mock_response)
-        # populate database with response
-        mock_populate_db.assert_has_calls([
-            mock.call(mock_response),
-            mock.call(mock_response_2),
-        ])
+        session = mock.Mock()
+        Session.return_value = session
+
+        self.scraper.scrape()
+
+        session.save.assert_called_once_with()
+
+    def test_gets_url_using_correct_date_filter(self, Session, requests, get_n_pages, populate_db, get_url):
+
+        self.scraper.scrape()
+
+        args, kwargs = get_url.call_args
+        self.assertEqual(kwargs['date_filter'], self.scraper.date_filter)
+
+    def test_get_n_pages_from_http_response(self, Session, requests, get_n_pages, populate_db, get_url):
+
+        response = mock.Mock()
+        requests.get.return_value = response
+        
+        self.scraper.scrape()
+
+        get_n_pages.assert_called_once_with(response)
+
+    def test_populates_db_with_initial_response(self, Session, requests, get_n_pages, populate_db, get_url):
+
+        response1 = mock.Mock()
+        response2 = mock.Mock()
+        response3 = mock.Mock()
+        requests.get.return_value = [response1, response2, response3]
+        
+        self.scraper.scrape()
+
+        calls = [mock.call(response1), mock.call(response2), mock.call(response3)]
+        populate_db.has_calls(calls)
 
 class TestGetUrl(django.test.TestCase):
 

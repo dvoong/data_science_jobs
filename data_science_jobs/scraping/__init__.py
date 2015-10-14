@@ -133,7 +133,7 @@ def get_date_filter(days_since):
     # elif days_since > 1 and days_since <= 3:
     #     return 3
     # ensure previous days are rescraped because the jobsearch site is weird
-    if days_since <= 3:
+    if days_since >= 0 and days_since <= 3:
         return 3
     elif days_since > 3 and days_since <= 7:
         return 7

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def update_daily_summaries():
     logger.info('Update Daily Summaries')
     previous_session = ScrapingSession.get_previous_session()
-    logger.info('Previous Scraping Session: {}'.format(previous_session.datetime))
+    logger.info('Previous Scraping Session: {}'.format(previous_session.datetime if previous_session else None))
     if previous_session == None:
         return
     last_summary = DailySummary.get_last_summary()
@@ -34,7 +34,7 @@ def update_daily_summaries():
 def update_monthly_summaries():
     logger.info('Update Monthly Summaries')
     previous_session = ScrapingSession.get_previous_session()
-    logger.info('Previous Scraping Session: {}'.format(previous_session.datetime))
+    logger.info('Previous Scraping Session: {}'.format(previous_session.datetime if previous_session else None))
     if previous_session == None:
         return
     last_summary = MonthlySummary.get_last_summary()

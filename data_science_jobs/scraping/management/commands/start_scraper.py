@@ -71,3 +71,4 @@ class Command(BaseCommand):
             if timezone.now() > next_datetime:
                 continue
             wait_till_next_session((next_datetime - timezone.now()).total_seconds())
+
