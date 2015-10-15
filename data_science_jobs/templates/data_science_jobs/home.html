@@ -74,6 +74,19 @@
   #id-filter form {
   margin-top: 100px;
   }
+
+  .line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+  }
+  
+  .axis path,
+  .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+  }
   
 </style>
 {% endblock %}
@@ -116,8 +129,11 @@
       <div style="padding-right: 5px" class="col col-md-8">
 	<div id="id-n-job-postings" class="section">
 	  <h2>Number of UK Data Science Job Postings</h2>
-	  <div style="border: 1px solid green; height: 355px">
+	  <div id="n-posts-plot">
 	  </div>
+	  <!-- <div style="border: 1px solid green; height: 355px"> -->
+	    
+	  <!-- </div> -->
 	</div>
       </div>
       

@@ -7,10 +7,10 @@ def parse_date(date_string):
     return datetime.date()
 
 def n_posts(request):
-    date_strings = request.GET.getlist('dates')
+    date_strings = request.GET.getlist('dates[]')
     dates = [parse_date(date_string) for date_string in date_strings]
-    output = {}
+    output = []
     for date in dates:
         daily_summary = DailySummary.objects.get(date=date)
-        output[date.isoformat()] = daily_summary.n_posts
-    return JsonResponse(output)
+        output += [{'date': date.isoformat(), 'n_posts': daily_summary.n_posts}]
+    return JsonResponse(output, safe=False)
