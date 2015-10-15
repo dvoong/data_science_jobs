@@ -17,8 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^$', 'data_science_jobs.views.home_page'),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^daily-summary$', 'data_science_jobs.data_aggregation.views.daily_summary'),
-    url(r'^api/', include('data_science_jobs.api.urls')),
+    url(r'^n_posts$', 'data_science_jobs.api.views.n_posts'),
+    # url(r'^admin/', include(admin.site.urls)),
+    # url(r'^daily-summary$', 'data_science_jobs.data_aggregation.views.daily_summary'),
 ]
