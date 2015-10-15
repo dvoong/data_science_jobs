@@ -1,12 +1,12 @@
-function populateNPosts(dataset) {
+function populateNPosts(dataset, width, height) {
     console.log("populateNPosts");
     console.log(dataset);
     var nPostsPlot = $("#n-posts-plot");
     console.log(nPostsPlot);
 
-    var m = [20, 20, 30, 50],
-	w = 700 - m[1] - m[3],
-	h = 300 - m[0] - m[2],
+    var m = [20, 30, 30, 60],
+	w = width - m[1] - m[3],
+	h = height - m[0] - m[2],
 	barPadding = 1;
     
     var svg = d3.select("#n-posts-plot").append("svg")
@@ -74,7 +74,12 @@ $(document).ready(function(){
     }
     console.log(lastTenDays);
 
-    $.get("api/n_posts", {dates: lastTenDaysStr}, function(response){ populateNPosts(response); });
+    var width = $("#n-posts-plot").width();
+    console.log("width:");
+    console.log(width);
+    var height = width / 2.3;
+    
+    $.get("api/n_posts", {dates: lastTenDaysStr}, function(response){ populateNPosts(response, width, height); });
 
     $(".controller .btn").click(function(e){
 	if($(this).hasClass("active")){
@@ -85,5 +90,15 @@ $(document).ready(function(){
 	    active_button.removeClass("active");
 	    $(this).addClass("active");
 	}
+    });
+
+    $(window).on("resize", function() {
+	console.log("window resize");
+	var chart = $("#n-posts-plot")
+	console.log(chart);
+	var targetWidth = chart.parent().width();
+	console.log("targetWidth: " + targetWidth);
+	chart.attr("width", targetWidth - 30);
+	chart.find("svg").attr("width", targetWidth - 30);
     });
 });
